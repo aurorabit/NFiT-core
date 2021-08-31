@@ -3,10 +3,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract NFiTMarket {
+    using SafeMath for uint256;
     using Counters for Counters.Counter;
+
     Counters.Counter private _itemNum;
 
     enum State { Normal, Published, Pawned, Retrieval }
@@ -31,9 +34,9 @@ contract NFiTMarket {
     function uploadNFT(
         address nftContract,
         uint256 tokenId, 
-        uint256 royalty) public returns (uint256) {
+        uint256 royalty) public returns (uint256 itemId) {
         _itemNum.increment();
-        uint256 itemId = _itemNum.current();
+        itemId = _itemNum.current();
         id2NFiTItem[itemId] = NFiTItem(
             itemId,
             nftContract,
@@ -49,15 +52,16 @@ contract NFiTMarket {
             State.Normal
         );
 
-        IERC721Full(nftContract).transferFrom(msg.sender, address(this), tokenId);
+        IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+        return itemId;
     }
 
-    function retrieveNFT(uint itemId) public {
+    function downloadNFT(uint itemId) public {
         require(id2NFiTItem[itemId].owner == msg.sender, "No permission to retrieve NFT");
         require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
 
         id2NFiTItem[itemId].state = State.Retrieval;
-        IERC721Full(nftContract).transferFrom(msg.sender, address(this), tokenId);
+        IERC721(id2NFiTItem[itemId].nftContract).transferFrom(msg.sender, address(this), id2NFiTItem[itemId].tokenId);
     }
 
     // set the NFT into Published state and prepare to sell or pawn it
@@ -83,9 +87,9 @@ contract NFiTMarket {
         id2NFiTItem[itemId].state = State.Normal;
         id2NFiTItem[itemId].owner = payable(msg.sender);
 
-        uint256 royalityValue = (msg.value).mul(id2NFiTItem[itemId].royality) / 100;
-        id2NFiTItem[itemId].creator.transfer(royalityValue);
-        id2NFiTItem[itemId].owner.transfer(msg.value - royalityValue);
+        uint256 royaltyValue = (msg.value).mul(id2NFiTItem[itemId].royalty) / 100;
+        id2NFiTItem[itemId].creator.transfer(royaltyValue);
+        id2NFiTItem[itemId].owner.transfer(msg.value - royaltyValue);
     }
 
     // pay for the loan, the value would be distributed to the owner and creator
@@ -96,9 +100,9 @@ contract NFiTMarket {
         id2NFiTItem[itemId].state = State.Pawned;
         id2NFiTItem[itemId].pawnor = payable(msg.sender);
         
-        uint royalityValue = msg.value.mul(id2NFiTItem[itemId].royality) / 100;
-        id2NFiTItem[itemId].creator.transfer(royalityValue);
-        id2NFiTItem[itemId].owner.transfer(msg.value - royalityValue);
+        uint royaltyValue = msg.value.mul(id2NFiTItem[itemId].royalty) / 100;
+        id2NFiTItem[itemId].creator.transfer(royaltyValue);
+        id2NFiTItem[itemId].owner.transfer(msg.value - royaltyValue);
     }
 
     // pay for the redeem, the value would be distributed to the pawnor and creator
@@ -109,17 +113,16 @@ contract NFiTMarket {
 
         id2NFiTItem[itemId].state = State.Normal;
 
-        uint royalityValue = msg.value.mul(item.royality) / 100;
-        item.creator.transfer(royalityValue);
-        item.pawnor.transfer(msg.value - royalityValue);
+        uint royaltyValue = msg.value.mul(id2NFiTItem[itemId].royalty) / 100;
+        id2NFiTItem[itemId].creator.transfer(royaltyValue);
+        id2NFiTItem[itemId].pawnor.transfer(msg.value - royaltyValue);
     }
 
-    function retrieveNFT (uint id) public {
-        NFT storage item = totalList[id];
-        require(item.state == State.Pawned, "The NFT is not in Pawned");
-        require(item.deadline < block.timestamp, "The NFT is not due");
+    function retrieveNFT (uint itemId) public {
+        require(id2NFiTItem[itemId].state == State.Pawned, "The NFT is not in Pawned");
+        require(id2NFiTItem[itemId].deadline < block.timestamp, "The NFT is not due");
 
-        item.owner = item.pawnor;
-        item.state = State.Normal;
+        id2NFiTItem[itemId].owner = id2NFiTItem[itemId].pawnor;
+        id2NFiTItem[itemId].state = State.Normal;
     }
 }

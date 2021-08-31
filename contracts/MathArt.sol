@@ -3,15 +3,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Full.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract MathArt is ERC721Full {
+contract MathArt is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     
     address public marketAddress;
 
-    constructor(address marketplaceAddress) public ERC721Full("MathArt", "MAT") {
+    constructor(address marketplaceAddress) ERC721("MathArt", "MAT") {
         marketAddress = marketplaceAddress;
     }
 

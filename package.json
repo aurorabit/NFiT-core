@@ -1,0 +1,22 @@
+{
+  "name": "nfit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aurorabit/NFiT-core.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aurorabit/NFiT-core/issues"
+  },
+  "homepage": "https://github.com/aurorabit/NFiT-core#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1"
+  }
+}
