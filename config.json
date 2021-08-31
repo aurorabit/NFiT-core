@@ -1,0 +1,10 @@
+{
+  "main": "./contracts/NFiTMarket.sol",
+  "deploy": "./build/contracts/NFiTMarket.json",
+  "compilers": {
+    "cfxtruffle": "1.0.2",
+    "solc": "0.8.0",
+    "evmVersion": "berlin"
+  },
+  "linter": "solhint"
+}
