@@ -121,7 +121,7 @@ contract NFiTMarket {
     }
 
     // set the NFT into Published state and prepare to sell or pawn it
-    function sellNFT (uint itemId, uint32 sellPrice, uint32 loanPrice, uint32 redeemPrice, uint32 deadline) public {
+    function sellNFT (uint itemId, uint sellPrice, uint loanPrice, uint redeemPrice, uint deadline) public {
         require(id2NFiTItem[itemId].owner == msg.sender, "No permission to sell NFT");
         require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
         require(sellPrice > 0 || loanPrice > 0, "Choose either sell or loan");
@@ -136,6 +136,7 @@ contract NFiTMarket {
 
     // pay for the NFT, the value would be distributed to owner and creator
     function buyNFT (uint itemId) public payable {
+        require(id2NFiTItem[itemId].owner != msg.sender, "Not allowed to buy your NFT");
         require(id2NFiTItem[itemId].state == State.Published, "The NFT is not in Published");
         require(id2NFiTItem[itemId].sellPrice > 0, "The NFT is not for sell");
         require(msg.value >= id2NFiTItem[itemId].sellPrice, "No enough value to buy");
@@ -177,7 +178,7 @@ contract NFiTMarket {
 
     function retrieveNFT (uint itemId) public {
         require(id2NFiTItem[itemId].pawnor == msg.sender, "No permission to retrieve NFT");
-        require(id2NFiTItem[itemId].owner == msg.sender, "No permission to redeem NFT");
+        require(id2NFiTItem[itemId].state == State.Pawned, "The NFT is not in Pawned");
         require(id2NFiTItem[itemId].deadline < block.timestamp, "The NFT is not due");
 
         id2NFiTItem[itemId].owner = id2NFiTItem[itemId].pawnor;
