@@ -29,7 +29,63 @@ contract NFiTMarket {
         State state;
     }
 
-    mapping(uint256 => NFiTItem) private id2NFiTItem;
+    mapping(uint256 => NFiTItem) public id2NFiTItem;
+
+    function getPublishedNFT() external view returns (uint[] memory itemIdList) {
+        uint itemId = _itemNum.current();
+        itemIdList = new uint[](itemId);
+        uint idx = 0;
+        for (uint i = 1; i <= itemId; i++) {
+            if (id2NFiTItem[i].state == State.Published) {
+                itemIdList[idx] = i;
+                idx += 1;
+            }
+        }
+        return itemIdList;
+    }
+
+    function getUserOwnedNFT(address user) external view returns (uint[] memory itemIdList) {
+        uint itemId = _itemNum.current();
+        itemIdList = new uint[](itemId);
+        uint idx = 0;
+        for (uint i = 1; i <= itemId; i++) {
+            if (id2NFiTItem[i].state == State.Normal && id2NFiTItem[i].owner == user) {
+                itemIdList[idx] = i;
+                idx += 1;
+            }
+        }
+        return itemIdList;
+    }
+
+    function getUserPawnedNFT(address user) external view returns (uint[] memory itemIdList) {
+        uint itemId = _itemNum.current();
+        itemIdList = new uint[](itemId);
+        uint idx = 0;
+        for (uint i = 1; i <= itemId; i++) {
+            if (id2NFiTItem[i].state == State.Pawned && id2NFiTItem[i].owner == user) {
+                itemIdList[idx] = i;
+                idx += 1;
+            }
+        }
+        return itemIdList;
+    }
+
+    function getUserReceivedNFT(address user) external view returns (uint[] memory itemIdList) {
+        uint itemId = _itemNum.current();
+        itemIdList = new uint[](itemId);
+        uint idx = 0;
+        for (uint i = 1; i <= itemId; i++) {
+            if (id2NFiTItem[i].state == State.Pawned && id2NFiTItem[i].pawnor == user) {
+                itemIdList[idx] = i;
+                idx += 1;
+            }
+        }
+        return itemIdList;
+    }
+
+    function getItemInfo(uint itemId) external view returns (NFiTItem memory) {
+        return id2NFiTItem[itemId];
+    }
 
     function uploadNFT(
         address nftContract,
@@ -61,13 +117,13 @@ contract NFiTMarket {
         require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
 
         id2NFiTItem[itemId].state = State.Retrieval;
-        IERC721(id2NFiTItem[itemId].nftContract).transferFrom(msg.sender, address(this), id2NFiTItem[itemId].tokenId);
+        IERC721(id2NFiTItem[itemId].nftContract).transferFrom(address(this), msg.sender, id2NFiTItem[itemId].tokenId);
     }
 
     // set the NFT into Published state and prepare to sell or pawn it
     function sellNFT (uint itemId, uint32 sellPrice, uint32 loanPrice, uint32 redeemPrice, uint32 deadline) public {
-        require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
         require(id2NFiTItem[itemId].owner == msg.sender, "No permission to sell NFT");
+        require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
         require(sellPrice > 0 || loanPrice > 0, "Choose either sell or loan");
         require(redeemPrice >= loanPrice, "The redeem price is less than loan price");
 
@@ -107,6 +163,7 @@ contract NFiTMarket {
 
     // pay for the redeem, the value would be distributed to the pawnor and creator
     function redeemNFT (uint itemId) public payable {
+        require(id2NFiTItem[itemId].owner == msg.sender, "No permission to redeem NFT");
         require(id2NFiTItem[itemId].state == State.Pawned, "The NFT is not in Pawned");
         require(msg.value >= id2NFiTItem[itemId].redeemPrice, "No enough value to loan");
         require(id2NFiTItem[itemId].deadline >= block.timestamp, "The NFT is due");
@@ -119,7 +176,8 @@ contract NFiTMarket {
     }
 
     function retrieveNFT (uint itemId) public {
-        require(id2NFiTItem[itemId].state == State.Pawned, "The NFT is not in Pawned");
+        require(id2NFiTItem[itemId].pawnor == msg.sender, "No permission to retrieve NFT");
+        require(id2NFiTItem[itemId].owner == msg.sender, "No permission to redeem NFT");
         require(id2NFiTItem[itemId].deadline < block.timestamp, "The NFT is not due");
 
         id2NFiTItem[itemId].owner = id2NFiTItem[itemId].pawnor;
