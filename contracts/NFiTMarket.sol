@@ -31,6 +31,10 @@ contract NFiTMarket {
 
     mapping(uint256 => NFiTItem) public id2NFiTItem;
 
+    function getCurrentItemId() external view returns (uint) {
+        return _itemNum.current();
+    }
+
     function getPublishedNFT() external view returns (uint[] memory itemIdList) {
         uint itemId = _itemNum.current();
         itemIdList = new uint[](itemId);
@@ -126,6 +130,7 @@ contract NFiTMarket {
         require(id2NFiTItem[itemId].state == State.Normal, "Not Normal State Now");
         require(sellPrice > 0 || loanPrice > 0, "Choose either sell or loan");
         require(redeemPrice >= loanPrice, "The redeem price is less than loan price");
+        require(deadline >= block.timestamp, "The deadline should be future");
 
         id2NFiTItem[itemId].state = State.Published;
         id2NFiTItem[itemId].sellPrice = sellPrice;
@@ -152,6 +157,7 @@ contract NFiTMarket {
     // pay for the loan, the value would be distributed to the owner and creator
     function receiveNFT (uint itemId) public payable {
         require(id2NFiTItem[itemId].state == State.Published, "The NFT is not in Published");
+        require(id2NFiTItem[itemId].loanPrice > 0, "The NFT is not for pawn");
         require(msg.value >= id2NFiTItem[itemId].loanPrice, "No enough value to loan");
 
         id2NFiTItem[itemId].state = State.Pawned;
