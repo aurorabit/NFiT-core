@@ -19,6 +19,10 @@ contract MathArt is ERC721URIStorage {
         marketAddress = _marketAddress;
     }
 
+    function getCurrentItemId() external view returns (uint) {
+        return _tokenIds.current();
+    }
+
     function createToken(string memory tokenURI) public returns (uint256) {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
