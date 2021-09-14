@@ -1,24 +1,24 @@
 # NFiT Core Contracts
 
-## how to test this contracts use remix
+## How to test this contracts using remix
 
-we meet some problems when deploy contracts on aurora testnet
+We meet some problems when deploy contracts on aurora testnet
 
 1. change metamask to aurora testnet
 2. add solidity file NFiTMarket.sol and MathArt.sol to remix 
 ![1631616483(1)](https://user-images.githubusercontent.com/25214732/133244383-8146e928-b5a7-4bd6-bf3d-64014ae1f1de.png)
 
-3. compile NFiTMarket.sol first, then deploy it and get the address of it.
-    notice : ENVIRONMENT please choose Injected Web3 to connect with metamask.
-    when deploy contract, the metamask will be called to pay the gas(which is 0 on aurora testnet now).
+3. compile NFiTMarket.sol first, and deploy it to get the address of the contract.
+    Notice : ENVIRONMENT please choose Injected Web3 to connect with metamask.
+    When deploy contract, the metamask will be called to pay the gas(which is 0 on aurora testnet now).
     
     
-4. then compile MathArt.sol, when deploy MathArt.sol, please input the address of **NFiTmarket.sol**.
+4. Then compile MathArt.sol, when deploy MathArt.sol, please input the address of **NFiTmarket.sol**.
 
 ![1631616827(1)](https://user-images.githubusercontent.com/25214732/133245118-cb14c777-3108-4c8d-a560-4b63fd5aea06.png)
-5. use the deployment of MathArt.sol to call function createToken, the input is a string to show the url of NFT(to test you can input any string) 
-6. call the function uploadNFT of NFiTMarket.sol 
+5. use the deployment of MathArt.sol to call function createToken, the input is a string to show the url of NFT(You can input any string for test) 
 
+6. call the function uploadNFT of NFiTMarket.sol 
 
     nftContract is the address of MathArt.sol 
     
