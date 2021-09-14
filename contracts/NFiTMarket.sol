@@ -35,56 +35,69 @@ contract NFiTMarket {
         return _itemNum.current();
     }
 
-    function getPublishedNFT() external view returns (uint[] memory itemIdList) {
+    function getPublishedNFT() external view returns (NFiTItem[] memory itemList) {
         uint itemId = _itemNum.current();
-        itemIdList = new uint[](itemId);
+        itemList = new NFiTItem[](itemId);
         uint idx = 0;
         for (uint i = 1; i <= itemId; i++) {
             if (id2NFiTItem[i].state == State.Published) {
-                itemIdList[idx] = i;
+                itemList[idx] = id2NFiTItem[i];
                 idx += 1;
             }
         }
-        return itemIdList;
+        return itemList;
     }
 
-    function getUserOwnedNFT(address user) external view returns (uint[] memory itemIdList) {
+    function getUserOwnedNFT(address user) external view returns (NFiTItem[] memory itemList) {
         uint itemId = _itemNum.current();
-        itemIdList = new uint[](itemId);
+        itemList = new NFiTItem[](itemId);
         uint idx = 0;
         for (uint i = 1; i <= itemId; i++) {
             if (id2NFiTItem[i].state == State.Normal && id2NFiTItem[i].owner == user) {
-                itemIdList[idx] = i;
+                itemList[idx] = id2NFiTItem[i];
                 idx += 1;
             }
         }
-        return itemIdList;
+        return itemList;
     }
 
-    function getUserPawnedNFT(address user) external view returns (uint[] memory itemIdList) {
+    function getUserPawnedNFT(address user) external view returns (NFiTItem[] memory itemList) {
         uint itemId = _itemNum.current();
-        itemIdList = new uint[](itemId);
+        itemList = new NFiTItem[](itemId);
         uint idx = 0;
         for (uint i = 1; i <= itemId; i++) {
             if (id2NFiTItem[i].state == State.Pawned && id2NFiTItem[i].owner == user) {
-                itemIdList[idx] = i;
+                itemList[idx] = id2NFiTItem[i];
                 idx += 1;
             }
         }
-        return itemIdList;
+        return itemList;
     }
 
-    function getUserReceivedNFT(address user) external view returns (uint[] memory itemIdList) {
+    function getUserReceivedNFT(address user) external view returns (NFiTItem[] memory itemList) {
         uint itemId = _itemNum.current();
-        itemIdList = new uint[](itemId);
+        itemList = new NFiTItem[](itemId);
         uint idx = 0;
         for (uint i = 1; i <= itemId; i++) {
             if (id2NFiTItem[i].state == State.Pawned && id2NFiTItem[i].pawnor == user) {
-                itemIdList[idx] = i;
+                itemList[idx] = id2NFiTItem[i];
                 idx += 1;
             }
         }
-        return itemIdList;
+        return itemList;
+    }
+
+    function getUserPublishedNFT(address user) external view returns (NFiTItem[] memory itemList) {
+        uint itemId = _itemNum.current();
+        itemList = new NFiTItem[](itemId);
+        uint idx = 0;
+        for (uint i = 1; i <= itemId; i++) {
+            if (id2NFiTItem[i].state == State.Published && id2NFiTItem[i].owner == user) {
+                itemList[idx] = id2NFiTItem[i];
+                idx += 1;
+            }
+        }
+        return itemList;
     }
 
     function getItemInfo(uint itemId) external view returns (NFiTItem memory) {
