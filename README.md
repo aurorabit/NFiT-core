@@ -42,5 +42,9 @@ We meet some problems when deploy contracts on aurora testnet
  
  and then we meet a problem : 
  ![1631617375(1)](https://user-images.githubusercontent.com/25214732/133246315-acd3c57f-87f7-40cd-b677-1f2d89f52fb1.png)
-
  
+ the transaction hash is below:
+ 
+ 0xca8b0b8785ff4b20fa3c8929c1c8cc3c9019f590cbcf22ecc7a3d09e67535fdc
+ 
+ Thanks for help very much !
